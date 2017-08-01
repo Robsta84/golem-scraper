@@ -1,3 +1,6 @@
+import sys; reload(sys)
+sys.setdefaultencoding('utf-8')
+
 from bs4 import BeautifulSoup
 import requests
 from article import Article
@@ -19,18 +22,20 @@ def get_header_elements(list_of_header):
     for header in list_of_header:
         link = header.find('header')        
         header_elements.extend(link)
-
+    
     return header_elements
 
 def get_all_href_tags(list_of_header_elements, list_elements):
     article_elements = []
 
-    for header_element in list_of_header_elements:
-        a_tag = header_element.attrs['href']    
-        for list_element in list_elements:
-            p_tag = list_element.find('p').text                
-            new_article = Article(p_tag, a_tag)      
-            article_elements.append(new_article)        
+    for element in range(0, len(list_of_header_elements)):
+        a_tag = list_of_header_elements[element].attrs['href'] 
+        headline = list_of_header_elements[element].find('h2').text        
+        p_tag = list_elements[element].find('p').text  
+        p_tag = p_tag[:p_tag.rfind('.') + 1] 
+        p_tag = p_tag.strip()          
+        new_article = Article(p_tag, a_tag, headline)              
+        article_elements.append(new_article)             
 
     return article_elements
     
@@ -42,8 +47,13 @@ if page.status_code == 200:
     articles_list = soup.find_all('ol', "list-articles")       
     list_elements = get_list_elements(articles_list)        
     header_elements = get_header_elements(list_elements)
-    articles = get_all_href_tags(header_elements, list_elements)      
-    print "article: ", (articles[0].link, articles[0].short_text)
+    articles = get_all_href_tags(header_elements, list_elements)       
+    print len(articles)
+    for article in articles:
+        print "headline:     %s \n" % article.headline
+        print "short text:   %s \n" % article.short_text
+        print "link:         %s \n" % article.link 
+        print "\n"        
 else:
     print ("Nothing to see here")
     
