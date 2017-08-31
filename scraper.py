@@ -4,6 +4,7 @@ sys.setdefaultencoding('utf-8')
 from bs4 import BeautifulSoup
 import requests
 from article import Article
+from database import Database
 
 import os
 
@@ -30,6 +31,7 @@ def get_header_elements(list_of_header):
 
 def get_all_href_tags(list_of_header_elements, list_elements):
     article_elements = []
+    database = Database()
 
     for element in range(0, len(list_of_header_elements)):
         a_tag = list_of_header_elements[element].attrs['href']
@@ -39,10 +41,11 @@ def get_all_href_tags(list_of_header_elements, list_elements):
         p_tag = p_tag.strip()
         new_article = Article(p_tag, a_tag, headline)
         article_elements.append(new_article)
+        database.add_article(new_article)
 
     return article_elements
 
-def get_full_article(chosen_article):
+def get_full_article(chosen_article):    
     print "\n" * 5
     base_url = 'https://www.golem.de'
     link_to_article = chosen_article.link
@@ -58,9 +61,8 @@ def get_full_article(chosen_article):
         print "%s \n" % tag.text
     
     return "stop"
-    
-    
-if __name__ == '__main__':
+       
+if __name__ == '__main__':    
     article_number = 0
 
     if page.status_code == 200:
@@ -79,7 +81,7 @@ if __name__ == '__main__':
             print "short text:     %s \n" % article.short_text
             print "link:           %s \n" % article.link
             print "article number: %d \n" % counter
-            print "\n"
+            print "\n"            
         article_number = int(raw_input("Select article: "))
         get_full_article(articles[article_number - 1])
     else:
